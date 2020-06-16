@@ -28,7 +28,7 @@ checkDebootstrap
 # Global build configuration
 global_config=${root}/run.config
 
-if [ ! -r ${global_config} ]; then 
+if [ ! -r ${global_config} ]; then
    bash "${root}/scripts/make_global_config.sh"
 fi
 source ${global_config}
@@ -102,7 +102,7 @@ while true; do
    read -rp ">> " x
    case $x in
       [1]* ) bash "${root}/stboot/coreboot-firmware/make_dummy.sh"; break;;
-      [2]* ) bash "${root}/stboot/uefi-firmware/make_dummy.sh"; break;;
+      [2]* ) bash "${root}/stboot/uefi-firmware/make_bootloader.sh"; break;;
       [3]* ) bash "${root}/stboot/mixed-firmware/make_image.sh" "$(id -un)"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
@@ -197,4 +197,3 @@ while true; do
       * ) echo "Invalid input";;
    esac
 done
-

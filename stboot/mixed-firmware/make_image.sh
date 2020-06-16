@@ -26,15 +26,15 @@ mnt=$(mktemp -d -t stmnt-XXXXXXXX)
 
 if [ -f "${img}" ]; then
     while true; do
-       echo "Current image file:"
-       ls -l "$(realpath --relative-to=${root} ${img})"
-       read -rp "Rebuild image? (y/n)" yn
-       case $yn in
-          [Yy]* ) echo "[INFO]: backup existing image to $(realpath --relative-to=${root} ${img_backup})"; mv "${img}" "${img_backup}"; break;;
-          [Nn]* ) exit;;
-          * ) echo "Please answer yes or no.";;
-       esac
-    done 
+        echo "Current image file:"
+        ls -l "$(realpath --relative-to=${root} ${img})"
+        read -rp "Rebuild image? (y/n)" yn
+        case $yn in
+            [Yy]* ) echo "[INFO]: backup existing image to $(realpath --relative-to=${root} ${img_backup})"; mv "${img}" "${img_backup}"; break;;
+            [Nn]* ) exit;;
+            * ) echo "Please answer yes or no.";;
+        esac
+   done
 fi
 
 echo "[INFO]: check for Linuxboot kernel"
@@ -48,7 +48,7 @@ bash "${dir}/make_syslinux_config.sh"
 
 
 
-if [ -d ${src} ]; then 
+if [ -d ${src} ]; then
    echo "[INFO]: Using cached Syslinux in $(realpath --relative-to=${root} ${src})"
 else
    echo "[INFO]: Downloading Syslinux Bootloader"
@@ -103,4 +103,3 @@ rm -r -f "${mnt}"
 
 echo ""
 echo "[INFO]: $(realpath --relative-to=${root} ${img}) created."
-

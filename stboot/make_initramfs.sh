@@ -31,7 +31,6 @@ if [ -z "${gopath}" ]; then
     echo -e "creating initramfs $failed"; exit 1;
 fi
 
-
 if [ -f "${initramfs_compressed}" ]; then
     while true; do
        echo "Current Linuxboot initramfs:"
@@ -42,17 +41,14 @@ if [ -f "${initramfs_compressed}" ]; then
           [Nn]* ) exit;;
           * ) echo "Please answer yes or no.";;
        esac
-    done 
+    done
 fi
-
-
 
 echo "[INFO]: check for hostvars.json"
 bash "${dir}/make_hostvars.sh"
 
 echo "[INFO]: update timstamp in hostvars.json to "$(date +%s)""
 jq '.build_timestamp = $newVal' --argjson newVal $(date +%s) ${dir}/include/hostvars.json > tmp.$$.json && mv tmp.$$.json ${dir}/include/hostvars.json || { echo "Cannot update timestamp in hostvars.json. Creating initramfs $failed";  exit 1; }
-
 
 if [ ${core_tools} = "y" ] ; then
     echo "[INFO]: create initramfs including all u-root core tools"
