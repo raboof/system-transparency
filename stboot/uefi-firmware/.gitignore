@@ -1,0 +1,5 @@
+efi_bootlayout.img
+stboot_linuxboot_efistub.defconfig
+stboot_linuxboot_efistub.defconfig.modified
+stboot.efi
+stboot.efi.backup

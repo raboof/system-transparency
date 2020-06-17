@@ -53,8 +53,6 @@ umount "${mnt}" || { echo -e "Unmounting $failed"; losetup -d "$dev"; exit 1; }
 echo "[INFO]: Moving data files"
 mount "${dev}p2" "${mnt}" || { echo -e "Mounting ${dev}p2 $failed"; losetup -d "$dev"; exit 1; }
 cp -R "${root}/stboot/data/." "${mnt}" || { echo -e "Copying files $failed"; losetup -d "$dev"; exit 1; }
-rm "${mnt}/create_example_data.sh"
-rm "${mnt}/README.md"
 umount "${mnt}" || { echo -e "Unmounting $failed"; losetup -d "$dev"; exit 1; }
 
 losetup -d "${dev}" || { echo -e "Loop device clean up $failed"; exit 1; }

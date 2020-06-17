@@ -39,6 +39,12 @@ keyring=${src_cache}/gnupg/keyring.gpg
 
 # ---
 
+# Copy initramfs to build directory
+
+cp "${dir}/initramfs-linuxboot.cpio.gz" "${build_src}/initramfs-linuxboot.cpio.gz"
+
+# ---
+
 # Kernel build setup
 
 if [ -f "${kernel_output_file_name}" ]; then
@@ -54,14 +60,14 @@ if [ -f "${kernel_output_file_name}" ]; then
     done
 fi
 
-if [ -f "${kernel_src_tarball}" ]; then
+if [ -f "${src_cache}/${kernel_ver}.tar.xz" ]; then
     echo "[INFO]: Using cached sources in $(realpath --relative-to=${root} ${src_cache})"
 else
     echo "[INFO]: Downloading Linux Kernel source files"
     wget "${kernel_src_tarball}" -P "${src_cache}"
 fi
 
-if [ -f "${kernel_src_signature}" ]; then
+if [ -f "${src_cache}/${kernel_ver}.tar.sign" ]; then
     echo "[INFO]: Using cached signature in $(realpath --relative-to=${root} ${src_cache})"
 else
     echo "[INFO]: Downloading Linux Kernel source signature"
@@ -83,7 +89,7 @@ fi
 
 echo "[INFO]: Verifying signature of the kernel tarball"
 count=$(xz -cd "${src_cache}/${kernel_ver}.tar.xz" \
-	   | gpgv --homedir "${src}/gnupg" "--keyring=${keyring}" --status-fd=1 "${src_cache}/${kernel_ver}.tar.sign" - \
+	   | gpgv --homedir "${src_cache}/gnupg" "--keyring=${keyring}" --status-fd=1 "${src_cache}/${kernel_ver}.tar.sign" - \
            | grep -c -E '^\[GNUPG:\] (GOODSIG|VALIDSIG)')
 if [[ "${count}" -lt 2 ]]; then
     echo -e "Verifying kernel tarball $failed"
@@ -111,18 +117,19 @@ while true; do
     echo "However, it is recommended to just save and exit without modifications."
     read -rp "Press any key to continue" x
     case $x in
-       * ) break;;
+        * ) break;;
     esac
 done
+
 make menuconfig
 make savedefconfig
 cp defconfig "${kernel_config_file_modified}"
 
 make "-j$(nproc)"
 cd "${dir}"
-cp "${build_src}/${kernel_ver}/arch/x86/boot/bzImage" "$kernel_output_file_name"
+cp "${build_src}/${kernel_ver}/arch/x86/boot/bzImage" "${kernel_output_file_name}"
 
 echo ""
-echo "Successfully created $(realpath --relative-to=${root} $kernel_output_file_name) ($kernel_ver)"
+echo "Successfully created $(realpath --relative-to=${root} ${kernel_output_file_name}) (${kernel_ver})"
 
 # ---
