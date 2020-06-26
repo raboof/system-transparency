@@ -15,9 +15,9 @@ root="$(cd "${dir}/../" && pwd)"
 
 # Define constants
 
-trusted_grub_archive_url="https://github.com/system-transparency/TrustedGRUB2/archive/1.4.1.tar.gz"
+trusted_grub_archive_url="https://github.com/system-transparency/TrustedGRUB2/archive/stboot.tar.gz"
 trusted_grub_archive_file_name="trusted_grub.tar.gz"
-trusted_grub_src_dir_name="TrustedGRUB2-1.4.1"
+trusted_grub_src_dir_name="TrustedGRUB2-stboot"
 trusted_grub_archive_checksum_file="tg_checksum"
 
 trusted_grub_install_dir_name="install"
@@ -67,11 +67,14 @@ function buildTrustedGrub {
   make
   make install
 
+  cp "${trusted_grub_bin}" "${cache_dir}/"
+  info "Saved the grub-install binary to"
+  info "${cache_dir}/grub-install"
+
   info "Cleaning up..."
   make clean
-
-  info "Saved the grub-install binary to"
-  info "${trusted_grub_bin}"
+  rm -rf "${cache_dir}/${trusted_grub_archive_checksum_file}"
+  rm -rf "${cache_dir}/${trusted_grub_archive_file_name}"
 
   cd "${dir}"
 }
