@@ -69,7 +69,7 @@ echo ""
 echo "[INFO]: Installing TrustedGRUB"
 sudo mount "${dev}p1" "${mnt}" || { echo -e "Mounting ${dev}p1 $failed"; sudo losetup -d "${dev}"; exit 1; }
 sudo mkdir -p "${mnt}/boot/grub" || { echo -e "Making grub config directory $failed"; sudo losetup -d "${dev}"; exit 1; }
-sudo "${trusted_grub_bin}" "--target=i386-pc" "--root-directory=${mnt}/boot/grub" "${dev}" || { echo -e "Writing volume boot record $failed"; sudo losetup -d "${dev}"; exit 1; }
+sudo "${trusted_grub_bin}" "--target=i386-pc" "--root-directory=${mnt}/" "${dev}" || { echo -e "Writing volume boot record $failed"; sudo losetup -d "${dev}"; exit 1; }
 
 echo ""
 echo "[INFO]: Moving linuxboot kernel and initramfs to image"
