@@ -20,12 +20,9 @@ trusted_grub_archive_file_name="trusted_grub.tar.gz"
 trusted_grub_src_dir_name="TrustedGRUB2-stboot"
 trusted_grub_archive_checksum_file="tg_checksum"
 
-trusted_grub_install_dir_name="install"
-
 cache_dir="${root}/cache/trusted_grub"
 
-trusted_grub_install_dir="${cache_dir}/${trusted_grub_src_dir_name}/${trusted_grub_install_dir_name}"
-trusted_grub_bin="${trusted_grub_install_dir}/sbin/grub-install"
+trusted_grub_install_dir=$1
 
 function info {
   echo "[INFO]" $1
@@ -57,8 +54,6 @@ function buildTrustedGrub {
 
   cd "${cache_dir}/${trusted_grub_src_dir_name}"
 
-  mkdir "${trusted_grub_install_dir_name}"
-
   info "Running configuration..."
   ./autogen.sh
   ./configure --prefix="${trusted_grub_install_dir}" --disable-werror --target=i386 -with-platform=pc
@@ -67,12 +62,7 @@ function buildTrustedGrub {
   make
   make install
 
-  cp "${trusted_grub_bin}" "${cache_dir}/"
-  info "Saved the grub-install binary to"
-  info "${cache_dir}/grub-install"
-
   info "Cleaning up..."
-  make clean
   rm -rf "${cache_dir}/${trusted_grub_archive_checksum_file}"
   rm -rf "${cache_dir}/${trusted_grub_archive_file_name}"
 

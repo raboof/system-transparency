@@ -39,12 +39,6 @@ bash "${dir}/make_kernel.sh"
 echo "[INFO]: check for Linuxboot initramfs including stboot bootloader"
 bash "${root}/stboot/make_initramfs.sh"
 
-trusted_grub_bin="${root}/cache/trusted_grub/grub-install"
-if [ ! -f "${trusted_grub_bin}" ]; then
-   echo "[INFO]: build TrustedGRUB2"
-   bash "${root}/stboot/make_trusted_grub.sh"
-fi
-
 
 echo "Linuxboot kernel: $(realpath --relative-to=${root} ${lnxbt_kernel})"
 echo "Linuxboot initramfs: $(realpath --relative-to=${root} ${lnxbt_initramfs})"
@@ -69,12 +63,27 @@ echo ""
 echo "[INFO]: Installing TrustedGRUB"
 sudo mount "${dev}p1" "${mnt}" || { echo -e "Mounting ${dev}p1 $failed"; sudo losetup -d "${dev}"; exit 1; }
 sudo mkdir -p "${mnt}/boot/grub" || { echo -e "Making grub config directory $failed"; sudo losetup -d "${dev}"; exit 1; }
-sudo "${trusted_grub_bin}" "--target=i386-pc" "--root-directory=${mnt}/" "${dev}" || { echo -e "Writing volume boot record $failed"; sudo losetup -d "${dev}"; exit 1; }
+
+echo "[INFO]: build TrustedGRUB2"
+sudo bash "${root}/stboot/make_trusted_grub.sh" "${mnt}"
+
+ls -l "${mnt}/sbin"
+sudo chmod +x "${mnt}/sbin/grub-install"
+sudo chmod +x "${mnt}/sbin/grub-mkconfig"
+
+sudo chroot "${mnt}" "/sbin/grub-install" "--target=i386-pc" "${dev}" || { echo -e "Writing volume boot record $failed"; sudo losetup -d "${dev}"; exit 1; }
+sudo chroot "${mnt}" "/sbin/grub-mkconfig" || { echo -e "Writing volume boot record $failed"; sudo losetup -d "${dev}"; exit 1; }
 
 echo ""
 echo "[INFO]: Moving linuxboot kernel and initramfs to image"
-sudo cp ${lnxbt_kernel} ${mnt}
-sudo cp ${lnxbt_initramfs} ${mnt}
+sudo cp ${lnxbt_kernel} "${mnt}/boot"
+sudo cp ${lnxbt_initramfs} "${mnt}/boot"
+
+# echo "[INFO]: Generating grub config"
+# sudo "${trusted_grub_config_bin}" "-o" "${mnt}/boot/grub/grub.cfg" || { echo -e "Writing boot config record $failed"; sudo losetup -d "${dev}"; exit 1; }
+
+ls -l "${mnt}/boot"
+
 sudo umount "${mnt}" || { echo -e "Unmounting $failed"; sudo losetup -d "$dev"; exit 1; }
 
 echo ""
