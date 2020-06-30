@@ -67,22 +67,13 @@ sudo mkdir -p "${mnt}/boot/grub" || { echo -e "Making grub config directory $fai
 echo "[INFO]: build TrustedGRUB2"
 sudo bash "${root}/stboot/make_trusted_grub.sh" "${mnt}"
 
-ls -l "${mnt}/sbin"
-sudo chmod +x "${mnt}/sbin/grub-install"
-sudo chmod +x "${mnt}/sbin/grub-mkconfig"
-
-sudo chroot "${mnt}" "/sbin/grub-install" "--target=i386-pc" "${dev}" || { echo -e "Writing volume boot record $failed"; sudo losetup -d "${dev}"; exit 1; }
-sudo chroot "${mnt}" "/sbin/grub-mkconfig" || { echo -e "Writing volume boot record $failed"; sudo losetup -d "${dev}"; exit 1; }
+sudo chroot $mnt /sbin/grub-install --target=i386-pc $dev || { echo -e "Writing volume boot record $failed"; sudo losetup -d "${dev}"; exit 1; }
+sudo chroot $mnt /sbin/grub-mkconfig -o /boot/grub/grub.cfg || { echo -e "Writing volume boot record $failed"; sudo losetup -d "${dev}"; exit 1; }
 
 echo ""
 echo "[INFO]: Moving linuxboot kernel and initramfs to image"
 sudo cp ${lnxbt_kernel} "${mnt}/boot"
 sudo cp ${lnxbt_initramfs} "${mnt}/boot"
-
-# echo "[INFO]: Generating grub config"
-# sudo "${trusted_grub_config_bin}" "-o" "${mnt}/boot/grub/grub.cfg" || { echo -e "Writing boot config record $failed"; sudo losetup -d "${dev}"; exit 1; }
-
-ls -l "${mnt}/boot"
 
 sudo umount "${mnt}" || { echo -e "Unmounting $failed"; sudo losetup -d "$dev"; exit 1; }
 
