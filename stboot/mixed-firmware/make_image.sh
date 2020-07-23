@@ -14,15 +14,10 @@ root="$(cd "${dir}/../../" && pwd)"
 img="${dir}/STBoot_mixed_firmware.img"
 img_backup="${dir}/STBoot_mixed_firmware.img.backup"
 part_table="${dir}/gpt.table"
-syslinux_src="https://mirrors.edge.kernel.org/pub/linux/utils/boot/syslinux/"
-syslinux_tar="syslinux-6.03.tar.xz"
-syslinux_dir="syslinux-6.03"
-syslinux_config="${dir}/syslinux.cfg"
 lnxbt_kernel="${dir}/vmlinuz-linuxboot"
 lnxbt_initramfs="${root}/stboot/initramfs-linuxboot.cpio.gz"
-src="${root}/cache/syslinux/"
+src="${root}/cache/trusted_grub/install/"
 mnt=$(mktemp -d -t stmnt-XXXXXXXX)
-
 
 if [ -f "${img}" ]; then
     while true; do
@@ -43,43 +38,53 @@ bash "${root}/stboot/make_initramfs.sh"
 echo "[INFO]: check for Linuxboot kernel"
 bash "${dir}/make_kernel.sh"
 
-echo "[INFO]: check for Syslinux configuration"
-bash "${dir}/make_syslinux_config.sh"
-
-
-if [ -d "${src}" ]; then
-   echo "[INFO]: Using cached Syslinux in $(realpath --relative-to=${root} ${src})"
-else
-   echo "[INFO]: Downloading Syslinux Bootloader"
-   wget "${syslinux_src}/${syslinux_tar}" -P "${src}"
-   tar -xf "${src}/${syslinux_tar}" -C "${src}"
-fi
+echo "[INFO]: Building trusted grub"
+bash "${root}/stboot/make_trusted_grub.sh"
 
 echo "Linuxboot kernel: $(realpath --relative-to="${root}" "${lnxbt_kernel}")"
 echo "Linuxboot initramfs: $(realpath --relative-to="${root}" "${lnxbt_initramfs}")"
 
 echo "[INFO]: Creating filesystems:"
 
-size_vfat=$((12*(1<<20)))
+size_vfat=$((32*(1<<20)))
 alignment=1048576
 
 # mkfs.vfat requires size as an (undefined) block-count; seem to be units of 1k
 if [ -f "${img}".vfat ]; then rm "${img}".vfat; fi
 mkfs.vfat -C -n "STBOOT" "${img}".vfat $((size_vfat >> 10))
 
-echo "[INFO]: Installing Syslinux"
-mmd -i "${img}".vfat ::syslinux
+echo "[INFO]: Installing Trusted Grub"
+mmd -i "${img}".vfat ::boot
+mmd -i "${img}".vfat ::boot/grub
 
-"${src}/${syslinux_dir}/bios/mtools/syslinux" --directory /syslinux/ --install "${img}".vfat
+mkdir -p "${src}/grub2"
+echo "configfile (hd0,msdos1)/boot/grub/grub.cfg" > "${src}/grub2/grub-early.cfg"
+echo "(hd0) /dev/loop0" > "${src}/grub2/device.map"
+echo "(hostdisk/dev/loop0) ${img}.vfat" >> "${src}/grub2/device.map"
+echo "
+insmod ext2
+insmod gettext
 
-echo "[INFO]: Copying syslinux config"
-mcopy -i "${img}".vfat "${syslinux_config}" ::syslinux/
+set default='0'
+set timeout='3'
+set root='(h0,1)'
+
+menuentry \"STBOOT\" {
+	linux /boot/${lnxbt_kernel}
+   initrd /boot/${lnxbt_initramfs}
+}" > "${src}/grub2/grub.cfg"
+
+"${src}/bin/grub-mkimage" -O i386-pc -c "${src}/grub2/grub-early.cfg" -o "${src}/grub2/core.img" -p '(hd0,msdos1)/boot/grub' biosdisk boot chain configfile ext2 linux ls part_msdos reboot serial vga gettext
+
+cp "${src}/lib/grub/i386-pc"/*.img "${src}/grub2/"
+mcopy -i "${img}".vfat "${src}/grub2/core.img" ::boot/grub/grub
+mcopy -i "${img}".vfat "${src}/grub2/grub.cfg" ::boot/grub/grub.cfg
 
 echo "[INFO]: Moving linuxboot kernel and initramfs to image"
 mcopy -i "${img}".vfat "${lnxbt_kernel}" ::
 mcopy -i "${img}".vfat "${lnxbt_initramfs}" ::
 
-size_ext4=$((767*(1<<20)))
+size_ext4=$((747*(1<<20)))
 
 if [ -f "${img}".ext4 ]; then rm "${img}".ext4; fi
 mkfs.ext4 -L "STDATA" "${img}".ext4 $((size_ext4 >> 10))
@@ -132,7 +137,7 @@ parted -s --align optimal "${img}" mklabel gpt mkpart "STBOOT" fat32 "$((offset_
 
 echo ""
 echo "[INFO]: Installing MBR"
-dd bs=440 count=1 conv=notrunc if="${src}/${syslinux_dir}/bios/mbr/gptmbr.bin" of="${img}" status=none
+dd bs=440 count=1 conv=notrunc if="${src}/grub2/boot.img" of="${img}" status=none
 
 echo ""
 echo "[INFO]: Image layout:"
