@@ -54,11 +54,11 @@ EOF
 fi
 
 # Note: TPM1 needs to access tcsd as root..
-swtpm_setup.sh --tpmstate $tpm --tpm2 \
-  --create-ek-cert --create-platform-cert --lock-nvram
+sudo swtpm_setup.sh --tpmstate $tpm \
+	--create-ek-cert --create-platform-cert --lock-nvram && sudo chown -R $(id -u):$(id -g) $tpm
 
 echo "Starting $tpm"
-swtpm socket --tpmstate dir=$tpm --tpm2 --ctrl type=unixio,path=/$tpm/swtpm-sock &
+swtpm socket --tpmstate dir=$tpm --ctrl type=unixio,path=/$tpm/swtpm-sock &
 
 
 qemu-system-x86_64 \
