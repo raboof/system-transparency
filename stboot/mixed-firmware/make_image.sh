@@ -63,18 +63,9 @@ mmd -i "${img}".vfat ::boot/grub/fonts
 
 mkdir -p "${src}/grub2"
 echo "configfile (hd0,msdos1)/boot/grub/grub.cfg" > "${src}/grub2/grub-early.cfg"
-echo "(hd0) /dev/loop0" > "${src}/grub2/device.map"
-echo "(hostdisk/dev/loop0) ${img}.vfat" >> "${src}/grub2/device.map"
+#echo "(hd0) /dev/loop0" > "${src}/grub2/device.map"
+#echo "(hostdisk/dev/loop0) ${img}.vfat" >> "${src}/grub2/device.map"
 echo "
-debug
-
-serial --speed=115200 --unit=0 --word=8 --parity=no --stop=1
-terminal_input --append  serial
-terminal_output --append serial
-set timeout=1
-play 480 440 1
-
-insmod ext2
 insmod gettext
 insmod font
 insmod fat
@@ -99,6 +90,8 @@ then
     terminal_output console
 fi
 
+insmod normal
+
 set default='0'
 set timeout='3'
 set root='(h0,1)'
@@ -108,10 +101,7 @@ menuentry \"STBOOT\" {
 	initrd /boot/${lnxbt_initramfs}
 }" > "${src}/grub2/grub.cfg"
 
-"${src}/bin/grub-mkimage" -O i386-pc -c "${src}/grub2/grub-early.cfg" -o "${src}/grub2/core.img" -p '(hd0,msdos1)/boot/grub' search_fs_uuid fat biosdisk boot chain configfile ext2 linux ls part_msdos reboot serial vga gettext
-
-mcopy -i "${img}".vfat "${src}/grub2/core.img" ::boot/grub/grub
-grub_offset=$(LANG=C grep --max-count=1 --only-matching --byte-offset --binary --text --perl-regexp "\x52\x56\xbe\x63\x81\xe8\x8a\x01" "${img}".vfat|cut -d: -f1)
+"${src}/bin/grub-mkimage" -O i386-pc -c "${src}/grub2/grub-early.cfg" -o "${src}/grub2/core.img" -p '(hd0,msdos1)/boot/grub' fat biosdisk boot chain configfile ext2 linux ls part_msdos reboot serial vga gettext terminal
 
 for f in "${src}/lib/grub/i386-pc"/*.mod; do
 	mcopy -i "${img}".vfat "${f}" ::boot/grub/i386-pc/
@@ -128,7 +118,10 @@ done
 for f in "${src}/share/grub/themes/starfield"/*; do
         mcopy -i "${img}".vfat "${f}" ::boot/grub/themes/starfield/
 done
-mcopy -i "${img}".vfat "${src}/grub2/core.img" ::boot/grub/i386-pc/core.img
+# Method2: Put core.img in filesystem and point to it.
+#mcopy -i "${img}".vfat "${src}/grub2/core.img" ::boot/grub/i386-pc/core.img
+#grub_offset=$(LANG=C grep --max-count=1 --only-matching --byte-offset --binary --text --perl-regexp "\x52\x56\xbe\x63\x81\xe8\x8a\x01" "${img}".vfat|cut -d: -f1)
+
 mcopy -i "${img}".vfat "${src}/grub2/grub.cfg" ::boot/grub/grub.cfg
 mcopy -i "${img}".vfat "${src}/share/grub/unicode.pf2" ::boot/grub/fonts/unicode.pf2
 
@@ -185,46 +178,24 @@ rm "${img}".ext4
 echo "[INFO]: Adding partitions to harddisk image:"
 
 # apply partitioning
-parted -s --align optimal "${img}" mklabel gpt mkpart "STBOOT" fat32 "$((offset_vfat * 512))B" "$((offset_vfat * 512 + size_vfat))B" mkpart "STDATA" ext4 "$((offset_ext4 * 512))B" "$((offset_ext4 * 512 + size_ext4))B" set 1 boot on set 1 legacy_boot on
+#parted -s --align optimal "${img}" mklabel gpt mkpart "STBOOT" fat32 "$((offset_vfat * 512))B" "$((offset_vfat * 512 + size_vfat))B" mkpart "STDATA" ext4 "$((offset_ext4 * 512))B" "$((offset_ext4 * 512 + size_ext4))B" set 1 boot on set 1 legacy_boot on
+parted -s --align optimal "${img}" mklabel msdos mkpart primary fat32 "$((offset_vfat * 512))B" "$((offset_vfat * 512 + size_vfat))B" mkpart primary ext4 "$((offset_ext4 * 512))B" "$((offset_ext4 * 512 + size_ext4))B" set 1 boot on
 
 echo ""
 echo "[INFO]: Installing MBR"
 dd bs=440 count=1 conv=notrunc if="${src}/grub2/boot.img" of="${img}" status=none
 # Set GRUB_BOOT_MACHINE_BOOT_DRIVE to 0xff
 echo -n -e '\xFF'| dd of="${img}" seek=$((0x64)) count=1 bs=1 conv=notrunc
-# Set GRUB_BOOT_MACHINE_KERNEL_SECTOR to VFAT offset + file offset
-n=$((${offset_vfat} + (${grub_offset}/512)))
-echo "GRUB2 core.img is at $((${offset_vfat} * 512 + ${grub_offset})) sector $n"
+
+dd if="${src}/grub2/core.img" of="${img}" bs=512 seek=2 conv=notrunc status=none
+grub_offset=1024
+
+# Set GRUB_BOOT_MACHINE_KERNEL_SECTOR to offset_vat + grub_offset/512
+n=$((${grub_offset}/512))
+echo "GRUB2 core.img is at ${grub_offset} sector $n"
 for i in 0 1 2 3 4 5 6 7; do
-	printf \\$(printf '%03o' $((($n >> ($i * 8)) & 0xff))) | dd of="${img}" seek=$((0x5c + $i)) count=1 bs=1 conv=notrunc
+	printf \\$(printf '%03o' $((($n >> ($i * 8)) & 0xff))) | dd of="${img}" seek=$((0x5c + $i)) count=1 bs=1 conv=notrunc status=none
 done
-
-#mkdir -p mnt
-
-#echo "IMG ${img}"
-#sudo kpartx -v -a "${img}"
-#sudo losetup /dev/loop1 /dev/mapper/loop1p1
-#sudo mount /dev/loop2 ./mnt
-
-#sudo mkdir -p ./mnt/dev
-#sudo mount --bind /dev ./mnt/dev
-#sudo mkdir -p ./mnt/boot/grub
-#sudo cat > ./mnt/boot/grub/device.map <<EOF
-#(hd0)   /dev/loop2
-#(hd0,1) /dev/loop3
-#EOF
-
-#sudo mkdir -p ./mnt/sbin
-#sudo cp "${src}/sbin/grub-mkconfig" ./mnt/sbin
-
-#sudo chroot ./mnt /sbin/grub-mkconfig -o /boot/grub/grub.cfg
-#"${src}/sbin/grub-install" --no-floppy --grub-mkdevicemap=./mnt/boot/grub/device.map --root-directory=./mnt /dev/loop1
-
-#sudo umount ./mnt/dev
-#sudo umount ./mnt
-#sudo losetup -d /dev/loop2
-#sudo kpartx -v -d /dev/loop1
-
 
 echo ""
 echo "[INFO]: Image layout:"
