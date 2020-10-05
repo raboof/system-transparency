@@ -36,13 +36,13 @@ uroot_dep = 		${home}${gosrc}${uroot_src}/u-root.go								\
 
 run.config :
 	@echo Run config ;
-ifeq (,$(wildcard ./../run.config))
-	make ${strepo}/bootballs
-
-	./make_global_config.sh
-include ./../run.config
+# For now, create run.config manually via make_global_config.sh
+# Replace it with make menuconfig like setup later on
+ifeq (,$(wildcard ./run.config))
+	./scripts/make_global_config.sh
+include ./run.config
 else
-include ./../run.config
+include ./run.config
 endif
 
 ${strepo}/bootballs :
@@ -61,7 +61,7 @@ toolchain :
 	@echo creating a toolchain;
 	make run.config
 ifeq (,$(wildcard ${home}${gosrc}${uroot_src}))
-make geturoot
+	make geturoot
 endif
 	git -C ${home}${gosrc}${uroot_src} checkout --quiet ${uroot_branch} 
 	make ~${gobin}/u-root 
@@ -71,27 +71,29 @@ endif
 
 keys : ./../keys/signing_keys ./../keys/cpu_keys
 	@echo Key generation ;
-#FIXME: add cleaner way to specify key locations, optimize the code
-	openssl genrsa -f4 -out ".key" 4096
-	@echo self-signing root certificate
-	openssl req -new -key ".key" -batch -subj '/CN=Test Root CA' -out "{}/root.cert" -x509 -days 1024
-	@echo creating rootcertificate fingerprint
-	
-	@echo generate keys for the cpu command
-	ssh-keygen -b 2048 -t rsa -f "${}/ssh_host_rsa_key" -q -N "" <<< y >/dev/null
-	ssh-keygen -b 2048 -t rsa -f "${}/cpu_rsa" -q -N "" <<< y >/dev/null
+#FIXME: remove the bashscript way of doing things
+	for I in 1 2 3 4 5
+	do
+		# Gen signing key
+		openssl genrsa -f4 -out "${signing_key_dir}/signing-key-${I}.key" 4096
+		# Certification request
+		openssl req -new -key "${signing_key_dir}/signing-key-${I}.key" -batch  -subj '/CN=Signing Key '"${I}" -out "${signing_key_dir}/signing-key-${I}.req"
+		# Fullfil certification req
+		openssl x509 -req -in "${signing_key_dir}/signing-key-${I}.req" -CA "${signing_key_dir}/root.cert" -CAkey "${signing_key_dir}/root.key" -out "${signing_key_dir}/signing-key-${I}.cert" -days 365 -CAcreateserial
+		# Remove certification req
+		rm "${signing_key_dir}/signing-key-${I}.req"
+	done
 
 bootball:
 	make run.config
-	
+
 ~${gobin}/u-root : ${uroot_dep}
 	@echo Install u-root ;
 	go install ${home}${gosrc}${uroot_src} 
-	
+
 ~${gobin}/stmanager : ${stmanagerg_dep}
 	@echo Install StManager ;
 	go install ${home}${gosrc}${uroot_src}${uroot_tools}/stmanager
 
-
-
-.PHONY: 
+.all: run.config toolchain
+#.PHONY:
