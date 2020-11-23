@@ -16,11 +16,11 @@ out="${root}/out/stboot-installation"
 name="host_configuration.json"
 host_config="${out}/${name}"
 
-network_mode=${ST_NETWORK_MODE}
-host_ip=${ST_HOST_IP}
-host_gateway=${ST_HOST_GATEWAY}
-host_dns=${ST_HOST_DNS}
-provisioning_url=${ST_PROVISIONING_SERVER_URL}
+network_mode=${ST_BOOT_COMMON_NETWORK_MODE}
+host_ip=${ST_BOOT_COMMON_NETWORK_HOST_IP}
+host_gateway=${ST_BOOT_COMMON_NETWORK_HOST_GATEWAY}
+host_dns=${ST_BOOT_COMMON_NETWORK_HOST_DNS}
+provisioning_url=${ST_BOOT_COMMON_PROVISIONING_SERVER_URL}
 
 if [ ! -d "${out}" ]; then mkdir -p "${out}"; fi
 

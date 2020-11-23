@@ -14,9 +14,9 @@ source ${root}/run.config
 
 common="${root}/stboot-installation/common"
 kernel_out="${root}/out/stboot-installation/mbr-bootloader/linuxboot.vmlinuz"
-kernel_version=${ST_MBR_BOOTLOADER_KERNEL_VERSION}
-kernel_config=${ST_MBR_BOOTLOADER_KERNEL_CONFIG}
-cmdline=${ST_LINUXBOOT_CMDLINE}
+kernel_version=${ST_BOOT_MBR_KERNEL_VERSION}
+kernel_config=${ST_BOOT_MBR_KERNEL_CONFIG}
+cmdline=${ST_BOOT_COMMON_LINUXBOOT_CMDLINE}
 
 
 bash "${common}/build_security_config.sh"

@@ -15,9 +15,9 @@ source ${root}/run.config
 out="${root}/out/stboot-installation"
 name="security_configuration.json"
 security_config="${out}/${name}"
-fingerprint_file=${ST_ROOTCERT_FINGERPRINT_FILE}
-num_signatures=${ST_NUM_SIGNATURES}
-boot_mode=${ST_BOOT_MODE}
+fingerprint_file=${ST_BOOT_COMMON_ROOTCERT_FINGERPRINT_FILE}
+num_signatures=${ST_BOOT_COMMON_NUM_SIGNATURES}
+boot_mode=${ST_BOOT_COMMON_BOOT_MODE}
 
 if [ ! -d "${out}" ]; then mkdir -p "${out}"; fi
 

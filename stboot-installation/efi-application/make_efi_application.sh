@@ -14,9 +14,9 @@ source ${root}/run.config
 
 common="${root}/stboot-installation/common"
 kernel_out="${root}/out/stboot-installation/efi-application/linuxboot.efi"
-kernel_version=${ST_EFI_APPLICATION_EFISTUB_KERNEL_VERSION}
-kernel_config=${ST_EFI_APPLICATION_EFISTUB_KERNEL_CONFIG}
-cmdline=${ST_LINUXBOOT_CMDLINE}
+kernel_version=${ST_BOOT_EFI_KERNEL_VERSION}
+kernel_config=${ST_BOOT_EFI_KERNEL_CONFIG}
+cmdline=${ST_BOOT_COMMON_LINUXBOOT_CMDLINE}
 
 bash "${common}/build_security_config.sh"
 

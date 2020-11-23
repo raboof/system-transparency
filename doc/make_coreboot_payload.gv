@@ -11,11 +11,11 @@ digraph make_coreboot_payload {
 	"make_coreboot_payload.sh" -> "build_host_config.sh"
 	"build_host_config.sh" -> {
 		node[style=solid shape=ellipse]
-		"ST_NETWORK_MODE"
-		"ST_HOST_IP"
-		"ST_HOST_GATEWAY"
-		"ST_HOST_DNS"
-		"ST_PROVISIONING_SERVER_URL"
+		"ST_BOOT_COMMON_NETWORK_MODE"
+		"ST_BOOT_COMMON_NETWORK_HOST_IP"
+		"ST_BOOT_COMMON_NETWORK_HOST_GATEWAY"
+		"ST_BOOT_COMMON_NETWORK_HOST_DNS"
+		"ST_BOOT_COMMON_PROVISIONING_SERVER_URL"
 	}
 	
 	"make_coreboot_payload.sh" -> "build_boot_filesystem.sh"
@@ -23,7 +23,7 @@ digraph make_coreboot_payload {
 	"make_coreboot_payload.sh" -> "build_data_filesystem.sh"
 	"build_data_filesystem.sh" -> {
 		node[style=solid shape=ellipse]
-		"ST_DATA_PARTITION_SZIZE"
+		"ST_BOOT_COMMON_DATA_PARTITION_SIZE"
 	}
 	
 	

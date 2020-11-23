@@ -29,7 +29,7 @@ version_dir="linux-${version}"
 tarball="${src_url}/${version_dir}.tar.xz"
 signature="${src_url}/${version_dir}.tar.sign"
 cache="${root}/cache/kernel"
-modify_config=${ST_CUSTOMIZE_KERNEL_CONFIG}
+modify_config=${ST_BOOT_COMMON_CUSTOMIZE_KERNEL_CONFIG}
 
 dev_key_1="torvalds@kernel.org"
 dev_key_2="gregkh@kernel.org"

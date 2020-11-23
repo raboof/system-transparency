@@ -12,21 +12,21 @@ digraph make_mbr_bootloader {
 	"make_mbr_bootloader.sh" -> "build_security_config.sh"
 	"build_security_config.sh"  -> {
 		node[style=solid shape=ellipse]
-		"ST_ROOTCERT_FINGERPRINT_FILE"
-		"ST_NUM_SIGNATURES"
-		"ST_BOOT_MODE"
+		"ST_BOOT_COMMON_ROOTCERT_FINGERPRINT_FILE"
+		"ST_BOOT_COMMON_NUM_SIGNATURES"
+		"ST_BOOT_COMMON_BOOT_MODE"
 	}
 
 	"make_mbr_bootloader.sh" -> "build_initramfs.sh"
 	"build_initramfs.sh" -> {
 		node[style=solid shape=ellipse constraint=false]
-		"ST_LINUXBOOT_VARIANT"
+		"ST_BOOT_COMMON_LINUXBOOT_VARIANT"
 	}
 
 	"make_mbr_bootloader.sh" -> "build_kernel.sh"
 	"build_kernel.sh" -> {
 		node[style=solid shape=ellipse constraint=false]
-		"ST_CUSTOMIZE_KERNEL_CONFIG"
+		"ST_BOOT_COMMON_CUSTOMIZE_KERNEL_CONFIG"
 	}
 
 	"make_mbr_bootloader.sh" -> "build_syslinux_config.sh"
@@ -35,11 +35,11 @@ digraph make_mbr_bootloader {
 	"make_mbr_bootloader.sh" -> "build_host_config.sh"
 	"build_host_config.sh" -> {
 		node[style=solid shape=ellipse]
-		"ST_NETWORK_MODE"
-		"ST_HOST_IP"
-		"ST_HOST_GATEWAY"
-		"ST_HOST_DNS"
-		"ST_PROVISIONING_SERVER_URL"
+		"ST_BOOT_COMMON_NETWORK_MODE"
+		"ST_BOOT_COMMON_NETWORK_HOST_IP"
+		"ST_BOOT_COMMON_NETWORK_HOST_GATEWAY"
+		"ST_BOOT_COMMON_NETWORK_HOST_DNS"
+		"ST_BOOT_COMMON_PROVISIONING_SERVER_URL"
 	}
 
 	"make_mbr_bootloader.sh" -> "build_boot_filesystem.sh"
@@ -48,7 +48,7 @@ digraph make_mbr_bootloader {
 	"make_mbr_bootloader.sh" -> "build_data_filesystem.sh"
 	"build_data_filesystem.sh" -> {
 		node[style=solid shape=ellipse]
-		"ST_DATA_PARTITION_SZIZE"
+		"ST_BOOT_COMMON_DATA_PARTITION_SIZE"
 	}
 
 	"make_mbr_bootloader.sh" -> "build_image.sh"
@@ -56,9 +56,9 @@ digraph make_mbr_bootloader {
 
 	"make_mbr_bootloader.sh" -> {
 		node[style=solid shape=ellipse]
-		"ST_MBR_BOOTLOADER_KERNEL_VERSION"
-		"ST_MBR_BOOTLOADER_KERNEL_CONFIG"
-		"ST_LINUXBOOT_CMDLINE"
+		"ST_BOOT_MBR_KERNEL_VERSION"
+		"ST_BOOT_MBR_KERNEL_CONFIG"
+		"ST_BOOT_COMMON_LINUXBOOT_CMDLINE"
 	}
 
 }

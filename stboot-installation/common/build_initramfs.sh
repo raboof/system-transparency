@@ -24,7 +24,7 @@ include_dir="${root}/stboot-installation/initramfs-includes"
 https_roots="${include_dir}/https_roots.pem"
 cpu_keys="${root}/out/keys/cpu_keys"
 
-variant=${ST_LINUXBOOT_VARIANT}
+variant=${ST_BOOT_COMMON_LINUXBOOT_VARIANT}
 
 gopath=$(go env GOPATH)
 if [ -z "${gopath}" ]; then
@@ -80,7 +80,7 @@ case $variant in
     github.com/u-root/cpu/cmds/cpud \
     github.com/u-root/u-root/cmds/boot/stboot
     ;;
-* ) echo "Unknown value in ST_LINUXBOOT_VARIANT";;
+* ) echo "Unknown value in ST_BOOT_COMMON_LINUXBOOT_VARIANT";;
 esac
 
 gzip -f "${initramfs}"
