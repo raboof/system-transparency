@@ -1,0 +1,199 @@
+digraph make_mbr_bootloader {	
+	rankdir=LR
+	node [shape=box style=filled fixedsize=true width=8]
+	ranksep=3
+	nodesep="1"
+	constraint=false
+	edge [headport="w" tailport="e"]
+	
+
+
+
+
+
+
+
+// "/stboot-installation/common/build_security_config.sh"
+	"/stboot-installation/common/build_security_config.sh" [fillcolor = indianred]
+	{
+		node [style=solid shape=ellipse]
+		//"/cache/configs/current/st_boot_mbr.conf"
+
+		"CONFIG: ${ST_BOOT_COMMON_ROOTCERT_FINGERPRINT_FILE}"
+		"CONFIG: ${ST_BOOT_COMMON_NUM_SIGNATURES}"
+		"CONFIG: ${ST_BOOT_COMMON_BOOT_MODE}" 
+	}
+	-> 
+	"/stboot-installation/common/build_security_config.sh" 
+	->	
+	{
+		node [style=solid shape=ellipse]
+		"/out/stboot-installation/security_configuration.json"
+	}
+		
+
+
+// "/stboot-installation/common/build_initramfs.sh"
+	"/stboot-installation/common/build_initramfs.sh" [fillcolor = indianred]
+
+	{ 
+		node [style=solid shape=ellipse]
+		//"/cache/configs/current/st_boot_mbr.conf" 
+		"CONFIG: ${ST_BOOT_COMMON_LINUXBOOT_VARIANT}"
+
+		"/out/stboot-installation/security_configuration.json"
+
+		"\"KEYS\""
+		"/stboot-installation/initramfs-includes/https_roots.pem"
+
+		// only variant debug/full
+		// "/stboot-installation/initramfs-includes/netsetup.elv"
+		// "netsetup.elv" 			
+		// "/stboot-installation/initramfs-includes/start_cpu.elv"
+		// "start_cpu.elv" 		
+		// "/out/keys/cpu_keys/ssh_host_rsa_key"
+		// "/etc/ssh/ssh_host_rsa_key" 
+		// "/out/keys/cpu_keys/cpu_rsa.pub" 				
+	}
+	-> 
+	"/stboot-installation/common/build_initramfs.sh"
+	->
+	{
+		node [style=solid shape=ellipse]
+		//"/out/stboot-installation/initramfs-linuxboot.cpio"
+		"/out/stboot-installation/initramfs-linuxboot.cpio.gz"
+	}
+
+
+	
+// "/stboot-installation/mbr-bootloader/make_mbr_bootloader.sh"
+
+	{ 
+		node [style=solid shape=ellipse]
+		//"/cache/configs/current/st_boot_mbr.conf" 
+		"CONFIG: ${ST_BOOT_MBR_KERNEL_CONFIG}"
+		"CONFIG: ${ST_BOOT_COMMON_LINUXBOOT_CMDLINE}"
+	}
+	-> 
+	"/stboot-installation/mbr-bootloader/make_mbr_bootloader.sh"
+	->
+	{
+		node [style=solid shape=ellipse]
+		"${ST_BOOT_MBR_KERNEL_CONFIG}.patch"
+	}
+
+
+
+
+// "/stboot-installation/common/build_kernel.sh"
+[fillcolor = indianred]
+	{ 
+		node [style=solid shape=ellipse]
+		//"/cache/configs/current/st_boot_mbr.conf" 
+		
+		"CONFIG: ${ST_BOOT_MBR_KERNEL_VERSION}"
+		"${ST_BOOT_MBR_KERNEL_CONFIG}.patch"
+
+		"/out/stboot-installation/initramfs-linuxboot.cpio.gz" // in defconfig aka "${ST_BOOT_MBR_KERNEL_CONFIG}.patch"
+	}
+	-> 
+	"/stboot-installation/common/build_kernel.sh"
+	->
+	{
+		node [style=solid shape=ellipse]
+		// "/cache/gnupg/keyring.gpg"	// will be only cached
+		"/out/stboot-installation/mbr-bootloader/linuxboot.vmlinuz"
+	}
+
+
+
+// "/stboot-installation/common/build_syslinux_config.sh"
+	"/stboot-installation/common/build_syslinux_config.sh" [fillcolor = indianred]
+
+	"/stboot-installation/common/build_syslinux_config.sh"
+	->
+	{
+		node [style=solid shape=ellipse]
+		"/out/stboot-installation/mbr-bootloader/syslinux.cfg"
+	}
+
+
+
+// "/stboot-installation/common/build_host_config.sh"
+	"/stboot-installation/common/build_host_config.sh" [fillcolor = indianred]
+
+	{ 
+		node [style=solid shape=ellipse]
+		//"/cache/configs/current/st_boot_mbr.conf" 
+		"CONFIG: ${ST_BOOT_COMMON_NETWORK_HOST_*}"
+		"CONFIG: ${ST_BOOT_COMMON_PROVISIONING_SERVER_URL}"
+	}
+	-> 
+	"/stboot-installation/common/build_host_config.sh"
+	->
+	{
+		node [style=solid shape=ellipse]
+		"/out/stboot-installation/host_configuration.json"
+	}
+
+
+
+// "/stboot-installation/mbr-bootloader/build_boot_filesystem.sh"
+	{ 
+		node [style=solid shape=ellipse]
+		"/cache/syslinux/syslinux-6.03/bios/mtools/syslinux"
+		"/out/stboot-installation/mbr-bootloader/linuxboot.vmlinuz"
+		"/out/stboot-installation/mbr-bootloader/syslinux.cfg"
+		"/out/stboot-installation/host_configuration.json"
+	}
+	-> 
+	"/stboot-installation/mbr-bootloader/build_boot_filesystem.sh"
+	->
+	{
+		node [style=solid shape=ellipse]
+		"/out/stboot-installation/mbr-bootloader/boot_partition.vfat"
+	}
+
+
+
+
+// "/stboot-installation/common/build_data_filesystem.sh"
+	"/stboot-installation/common/build_data_filesystem.sh" [fillcolor = indianred]
+	{ 
+		node [style=solid shape=ellipse]
+		"/out/os-packages/\*"
+		//"/out/os-packages/local_boot_order_file"
+		"CONFIG: ${ST_BOOT_COMMON_DATA_PARTITION_SIZE}"
+	}
+	-> 
+	"/stboot-installation/common/build_data_filesystem.sh"
+	->
+	{
+		node [style=solid shape=ellipse]
+		"/out/stboot-installation/data_partition.ext4"
+	}
+
+
+// "/stboot-installation/mbr-bootloader/build_image.sh"
+
+	{ 
+		node [style=solid shape=ellipse]
+		"/out/stboot-installation/mbr-bootloader/boot_partition.vfat"
+		"/out/stboot-installation/data_partition.ext4"
+	}
+	-> 
+	"/stboot-installation/mbr-bootloader/build_image.sh"
+	->
+	{
+		node [style=solid shape=ellipse]
+		"/out/stboot-installation/mbr-bootloader/stboot_mbr_installation.img"
+	}
+
+	
+	
+//	}
+	
+	
+	
+	
+}
