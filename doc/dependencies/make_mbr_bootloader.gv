@@ -1,4 +1,4 @@
-digraph make_mbr_bootloader {	
+digraph build_mbr_kernel_config {	
 	rankdir=LR
 	node [shape=box style=filled fixedsize=true width=8]
 	ranksep=3
@@ -66,7 +66,7 @@ digraph make_mbr_bootloader {
 
 
 	
-// "/stboot-installation/mbr-bootloader/make_mbr_bootloader.sh"
+// "/stboot-installation/mbr-bootloader/build_mbr_kernel_config.sh"
 
 	{ 
 		node [style=solid shape=ellipse]
@@ -75,7 +75,7 @@ digraph make_mbr_bootloader {
 		"CONFIG: ${ST_BOOT_COMMON_LINUXBOOT_CMDLINE}"
 	}
 	-> 
-	"/stboot-installation/mbr-bootloader/make_mbr_bootloader.sh"
+	"/stboot-installation/mbr-bootloader/build_mbr_kernel_config.sh"
 	->
 	{
 		node [style=solid shape=ellipse]
@@ -86,7 +86,7 @@ digraph make_mbr_bootloader {
 
 
 // "/stboot-installation/common/build_kernel.sh"
-[fillcolor = indianred]
+"/stboot-installation/common/build_kernel.sh" [fillcolor = indianred]
 	{ 
 		node [style=solid shape=ellipse]
 		//"/cache/configs/current/st_boot_mbr.conf" 

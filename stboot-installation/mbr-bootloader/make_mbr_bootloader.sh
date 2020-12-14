@@ -14,20 +14,14 @@ source ${root}/run.config
 
 common="${root}/stboot-installation/common"
 kernel_out="${root}/out/stboot-installation/mbr-bootloader/linuxboot.vmlinuz"
-kernel_version=${ST_BOOT_MBR_KERNEL_VERSION}
+ernel_version=${ST_BOOT_MBR_KERNEL_VERSION}
 kernel_config=${ST_BOOT_MBR_KERNEL_CONFIG}
-cmdline=${ST_BOOT_COMMON_LINUXBOOT_CMDLINE}
-
 
 bash "${common}/build_security_config.sh"
 
 bash "${common}/build_initramfs.sh"
 
-echo
-echo "[INFO]: Patching kernel configuration to include configured command line:"
-echo "cmdline: ${cmdline}"
-cp "${kernel_config}" "${kernel_config}.patch"
-sed -i "s/CONFIG_CMDLINE=.*/CONFIG_CMDLINE=\"${cmdline}\"/" "${kernel_config}.patch"
+bash "${dir}/build_mbr_kernel_config.sh"
 
 bash "${common}/build_kernel.sh" "${root}/${kernel_config}" "${kernel_out}" "${kernel_version}"
 
