@@ -1,5 +1,3 @@
-.PHONY: all
-
 ROOTDIR := $(CURDIR)
 COMMONDIR := $(ROOTDIR)/stboot-installation/common
 CONFIGDIR := $(ROOTDIR)/cache/stboot-installation/
@@ -66,20 +64,6 @@ host_configuration.json: $(CONFIGDIR)/host_configuration.json.conf
 
 
 
-$(CONFIGDIR)/st_boot_mbr_kernel_config.patch.conf: $(ROOTDIR)/run.config $(CONFIGDIR)
-	echo "generating: $@ "
-	$(eval CONFIGS_NAMES := ST_BOOT_MBR_KERNEL_CONFIG|ST_BOOT_LINUXBOOT_CMDLINE)
-	cat $(ROOTDIR)/run.config | grep -E "$(CONFIGS_NAMES)" >> $@.temp
-	rsync -c $@.temp $@
-	rm $@.temp
-
-st_boot_mbr_kernel_config.patch: $(CONFIGDIR)/st_boot_mbr_kernel_config.patch.conf
-	@echo "\ngenerating: $@" 
-	build_host_config.sh
-
-
-
-
 
 $(CONFIGDIR)/data_partition.ext4.conf: $(ROOTDIR)/run.config $(CONFIGDIR)
 	echo "generating: $@ "
@@ -115,22 +99,5 @@ boot_partition.vfat: syslinux.cfg host_configuration.json ${CACHE}/syslinux linu
 	@echo "\ngenerating: $@" 
 	$(ROOTDIR)/stboot-installation/mbr_bootloader/build_build_filesystem.sh
 
-
-
-
-
-
-
-stboot_mbr_installation.img: boot_partition.vfat data_partition.ext4
-	@echo "\ngenerating: :@"
-	$(ROOTDIR)/stboot-installation/mbr_bootloader/build_imagesh
-
-
-
-
-
-
-all: linuxboot.vmlinux.conf $(ROOTDIR)/out/stboot-installation/security_configuration.json
-	@echo "all" 	
 
 
