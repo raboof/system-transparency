@@ -13,7 +13,7 @@ dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../../" && pwd)"
 
 # import global configuration
-source ${root}/run.config
+source ${root}/cache/stboot-installation/linuxboot.vmlinux.conf
 
 # Config variables and arguments
 

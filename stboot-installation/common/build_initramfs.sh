@@ -12,7 +12,7 @@ dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../../" && pwd)"
 
 # import global configuration
-source ${root}/run.config
+source ${root}/cache/stboot-installation/initramfs-linuxboot.cpio.gz.conf
 
 out="${root}/out/stboot-installation"
 name="initramfs-linuxboot.cpio"

@@ -6,14 +6,14 @@ $(CONFIGDIR):
 	@echo generating $@
 	mkdir -p $(CONFIGDIR)
 
-$(CONFIGDIR)/security_config.json.conf: $(ROOTDIR)/run.config $(CONFIGDIR)
+$(CONFIGDIR)/security_configuration.json.conf: $(ROOTDIR)/run.config $(CONFIGDIR)
 	@echo "generating: $@ " 
 	$(eval CONFIGS_NAMES := ST_BOOT_COMMON_ROOTCERT_FINGERPRINT_FILE|ST_BOOT_COMMON_NUM_SIGNATURES|ST_BOOT_COMMON_BOOT_MODE)
 	cat $(ROOTDIR)/run.config | grep -E "$(CONFIGS_NAMES)" >> $@.temp
 	rsync -c $@.temp $@
 	rm $@.temp
 
-$(ROOTDIR)/out/stboot-installation/security_configuration.json: $(CONFIGDIR)/security_config.json.conf
+$(ROOTDIR)/out/stboot-installation/security_configuration.json: $(CONFIGDIR)/security_configuration.json.conf
 	@echo "\ngenerating: >$@" 
 	$(COMMONDIR)/build_security_config.sh
 
@@ -43,7 +43,7 @@ $(CONFIGDIR)/linuxboot.vmlinux.conf: $(ROOTDIR)/run.config $(CONFIGDIR)
 	rsync -c $@.temp $@
 	rm $@.temp
 
-linuxboot.vmlinux: linuxboot.vmlinux.conf
+linuxboot.vmlinux: $(CONFIGDIR)/linuxboot.vmlinux.conf
 	@echo "linuxboot.vmlinux"
 
 
@@ -77,7 +77,7 @@ ASSET_MAIN = $(ROOTDIR)/out/os-packages/
 ASSET_DIRS = $(shell find $(ASSET_MAIN) -type d)
 ASSET_FILES = $(shell find $(ASSET_MAIN) -type f -name '*')
 
-data_partition.ext4: data_partition.ext4.conf $(ASSET_MAIN) $(ASSET_DIRS) $(ASSET_FILES)
+data_partition.ext4: $(CONFIGDIR)/data_partition.ext4.conf $(ASSET_MAIN) $(ASSET_DIRS) $(ASSET_FILES)
 	@echo "\ngenerating: $@" 
 	$(ROOTDIR)/stboot-installation/common/build_data_filesystem.sh
 
