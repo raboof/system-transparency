@@ -10,7 +10,7 @@ dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../../" && pwd)"
 
 # import global configuration
-source ${root}/run.config
+source ${root}/cache/stboot-installation/st_boot_mbr_kernel_config.patch.conf
 
 common="${root}/stboot-installation/common"
 kernel_out="${root}/out/stboot-installation/mbr-bootloader/linuxboot.vmlinuz"
