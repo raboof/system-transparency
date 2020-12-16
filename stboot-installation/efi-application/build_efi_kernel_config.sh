@@ -18,20 +18,8 @@ kernel_version=${ST_BOOT_EFI_KERNEL_VERSION}
 kernel_config=${ST_BOOT_EFI_KERNEL_CONFIG}
 cmdline=${ST_BOOT_COMMON_LINUXBOOT_CMDLINE}
 
-bash "${common}/build_security_config.sh"
-
-bash "${common}/build_initramfs.sh"
-
-bash "${dir}/build_efi_kernel_config.sh"
-
-bash "${common}/build_kernel.sh" "${root}/${kernel_config}" "${kernel_out}" "${kernel_version}"
-
-bash "${common}/build_host_config.sh"
-
-bash "${dir}/build_boot_filesystem.sh"
-
-bash "${common}/build_data_filesystem.sh"
-
-bash "${dir}/build_image.sh"
-
-trap - EXIT
+echo
+echo "[INFO]: Patching kernel configuration to include configured command line:"
+echo "cmdline: ${cmdline}"
+cp "${kernel_config}" "${kernel_config}.patch"
+sed -i "s/CONFIG_CMDLINE=.*/CONFIG_CMDLINE=\"${cmdline}\"/" "${kernel_config}.patch"

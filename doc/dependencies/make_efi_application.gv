@@ -67,7 +67,7 @@ digraph make_mbr_bootloader {
 
 
 	
-// "/stboot-installation/efi-application/make_efi_application.sh"
+// "/stboot-installation/efi-application/build_efi_kernel_config.sh"
 
 	{ 
 		node [style=solid shape=ellipse]
@@ -76,7 +76,7 @@ digraph make_mbr_bootloader {
 		"CONFIG: ${ST_BOOT_COMMON_LINUXBOOT_CMDLINE}"
 	}
 	-> 
-	"/stboot-installation/efi-application/make_efi_application.sh"
+	"/stboot-installation/efi-application/build_efi_kernel_config.sh"
 	->
 	{
 		node [style=solid shape=ellipse]
