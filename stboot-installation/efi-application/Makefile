@@ -1,10 +1,13 @@
 .PHONY: all
 
+
 ROOTDIR := $(CURDIR)
 COMMONDIR := $(ROOTDIR)/stboot-installation/common
 CONFIGDIR := $(ROOTDIR)/cache/stboot-installation/
+OUTDIR := $(ROOTDIR)/out/stboot-installation
 
 
+include ./stboot-installation/common/Makefile
 
 
 
@@ -23,12 +26,12 @@ $(CONFIGDIR)/st_boot_efi_kernel_config.patch.conf: $(ROOTDIR)/run.config $(CONFI
 	rsync -c $@.temp $@
 	rm $@.temp
 
-st_boot_efi_kernel_config.patch: $(CONFIGDIR)/st_boot_efi_kernel_config.patch.conf
+st_boot_efi_kernel_config: $(CONFIGDIR)/st_boot_efi_kernel_config.conf
 	@echo "\ngenerating: $@" 
 	build_efi_kernel_config.sh
 
 
 
 
-all: linuxboot.vmlinux.conf $(ROOTDIR)/out/stboot-installation/security_configuration.json
+all: stboot_efi_installation.img
 	@echo "all" 	

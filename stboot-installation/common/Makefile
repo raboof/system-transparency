@@ -1,19 +1,17 @@
 ROOTDIR := $(CURDIR)
 COMMONDIR := $(ROOTDIR)/stboot-installation/common
-CONFIGDIR := $(ROOTDIR)/cache/stboot-installation/
+CONFIGDIR := $(ROOTDIR)/cache/stboot-installation
+OUTDIR := $(ROOTDIR)/out/stboot-installation
 
-$(CONFIGDIR):
-	@echo generating $@
-	mkdir -p $(CONFIGDIR)
 
-$(CONFIGDIR)/security_configuration.json.conf: $(ROOTDIR)/run.config $(CONFIGDIR)
+$(CONFIGDIR)/security_configuration.json.conf: $(ROOTDIR)/run.config 
 	@echo "generating: $@ " 
 	$(eval CONFIGS_NAMES := ST_BOOT_COMMON_ROOTCERT_FINGERPRINT_FILE|ST_BOOT_COMMON_NUM_SIGNATURES|ST_BOOT_COMMON_BOOT_MODE)
 	cat $(ROOTDIR)/run.config | grep -E "$(CONFIGS_NAMES)" >> $@.temp
 	rsync -c $@.temp $@
 	rm $@.temp
 
-$(ROOTDIR)/out/stboot-installation/security_configuration.json: $(CONFIGDIR)/security_configuration.json.conf
+$(OUTDIR)/security_configuration.json: $(CONFIGDIR)/security_configuration.json.conf
 	@echo "\ngenerating: >$@" 
 	$(COMMONDIR)/build_security_config.sh
 
@@ -22,14 +20,15 @@ $(ROOTDIR)/out/stboot-installation/security_configuration.json: $(CONFIGDIR)/sec
 
 
 
-$(CONFIGDIR)/initramfs-linuxboot.cpio.gz.conf: $(ROOTDIR)/run.config $(CONFIGDIR)
+$(CONFIGDIR)/initramfs-linuxboot.cpio.gz.conf: $(ROOTDIR)/run.config 
 	echo "generating: $@ "
 	$(eval CONFIGS_NAMES := ST_BOOT_MBR_KERNEL_VERSION)
 	cat $(ROOTDIR)/run.config | grep -E "$(CONFIGS_NAMES)" >> $@.temp
 	rsync -c $@.temp $@
 	rm $@.temp
 
-initramfs-linuxboot.cpio.gz: $(CONFIGDIR)/initramfs-linuxboot.cpio.gz.conf $(ROOTDIR)/stboot-installation/initramfs-includes/https_roots.pem security_configuration.json
+
+$(OUTDIR)/initramfs-linuxboot.cpio.gz: $(CONFIGDIR)/initramfs-linuxboot.cpio.gz.conf $(ROOTDIR)/stboot-installation/initramfs-includes/https_roots.pem $(CONFIGDIR)/security_configuration.json
 	@echo "common/build_kernel.sh"
 
 
@@ -43,7 +42,7 @@ $(CONFIGDIR)/linuxboot.vmlinux.conf: $(ROOTDIR)/run.config $(CONFIGDIR)
 	rsync -c $@.temp $@
 	rm $@.temp
 
-linuxboot.vmlinux: $(CONFIGDIR)/linuxboot.vmlinux.conf
+$(OUTDIR)/mbr-bootloader/linuxboot.vmlinux: $(CONFIGDIR)/linuxboot.vmlinux.conf
 	@echo "linuxboot.vmlinux"
 
 
@@ -56,7 +55,7 @@ $(CONFIGDIR)/host_configuration.json.conf: $(ROOTDIR)/run.config $(CONFIGDIR)
 	rsync -c $@.temp $@
 	rm $@.temp
 
-host_configuration.json: $(CONFIGDIR)/host_configuration.json.conf
+$(OUTDIR)/host_configuration.json: $(CONFIGDIR)/host_configuration.json.conf
 	@echo "\ngenerating: $@" 
 	build_host_config.sh
 
@@ -77,7 +76,7 @@ ASSET_MAIN = $(ROOTDIR)/out/os-packages/
 ASSET_DIRS = $(shell find $(ASSET_MAIN) -type d)
 ASSET_FILES = $(shell find $(ASSET_MAIN) -type f -name '*')
 
-data_partition.ext4: $(CONFIGDIR)/data_partition.ext4.conf $(ASSET_MAIN) $(ASSET_DIRS) $(ASSET_FILES)
+$(OUTDIR)/data_partition.ext4: $(CONFIGDIR)/data_partition.ext4.conf $(ASSET_MAIN) $(ASSET_DIRS) $(ASSET_FILES)
 	@echo "\ngenerating: $@" 
 	$(ROOTDIR)/stboot-installation/common/build_data_filesystem.sh
 
@@ -86,7 +85,7 @@ data_partition.ext4: $(CONFIGDIR)/data_partition.ext4.conf $(ASSET_MAIN) $(ASSET
 
 
 
-syslinux.cfg:
+$(OUTDIR)/mbr-bootloader/syslinux.cfg:
 	@echo "\ngenerating: $@" 
 	build_syslinux_config.sh
 
@@ -95,7 +94,7 @@ syslinux.cfg:
 
 
 
-boot_partition.vfat: syslinux.cfg host_configuration.json ${CACHE}/syslinux linuxboot.vmlinux
+$(OUTDIR)/boot_partition.vfat: syslinux.cfg $(OUTDIR)/host_configuration.json ${CACHE}/syslinux $(OUTDIR)/mbr-bootloader/linuxboot.vmlinux
 	@echo "\ngenerating: $@" 
 	$(ROOTDIR)/stboot-installation/mbr_bootloader/build_build_filesystem.sh
 
