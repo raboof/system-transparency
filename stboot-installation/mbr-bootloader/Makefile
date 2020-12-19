@@ -17,7 +17,7 @@ $(OUTDIR)/mbr-bootloader/stboot_mbr_installation.img: $(OUTDIR)/boot_partition.v
 
 
 $(CONFIGDIR)/st_boot_mbr_kernel.config.conf: $(ROOTDIR)/run.config $(CONFIGDIR)
-	echo "generating: $@ "
+	@echo "\ngenerating: $@ "
 	$(eval CONFIGS_NAMES := ST_BOOT_MBR_KERNEL_CONFIG|ST_BOOT_LINUXBOOT_CMDLINE)
 	cat $(ROOTDIR)/run.config | grep -E "$(CONFIGS_NAMES)" >> $@.temp
 	rsync -c $@.temp $@

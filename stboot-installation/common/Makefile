@@ -5,14 +5,14 @@ OUTDIR := $(ROOTDIR)/out/stboot-installation
 
 
 $(CONFIGDIR)/security_configuration.json.conf: $(ROOTDIR)/run.config 
-	@echo "generating: $@ " 
+	@echo "\ngenerating: $@ " 
 	$(eval CONFIGS_NAMES := ST_BOOT_COMMON_ROOTCERT_FINGERPRINT_FILE|ST_BOOT_COMMON_NUM_SIGNATURES|ST_BOOT_COMMON_BOOT_MODE)
 	cat $(ROOTDIR)/run.config | grep -E "$(CONFIGS_NAMES)" >> $@.temp
 	rsync -c $@.temp $@
 	rm $@.temp
 
 $(OUTDIR)/security_configuration.json: $(CONFIGDIR)/security_configuration.json.conf
-	@echo "\ngenerating: >$@" 
+	@echo "\ngenerating: $@" 
 	$(COMMONDIR)/build_security_config.sh
 
 
@@ -21,14 +21,14 @@ $(OUTDIR)/security_configuration.json: $(CONFIGDIR)/security_configuration.json.
 
 
 $(CONFIGDIR)/initramfs-linuxboot.cpio.gz.conf: $(ROOTDIR)/run.config 
-	echo "generating: $@ "
+	echo "\ngenerating: $@ "
 	$(eval CONFIGS_NAMES := ST_BOOT_MBR_KERNEL_VERSION)
 	cat $(ROOTDIR)/run.config | grep -E "$(CONFIGS_NAMES)" >> $@.temp
 	rsync -c $@.temp $@
 	rm $@.temp
 
 
-$(OUTDIR)/initramfs-linuxboot.cpio.gz: $(CONFIGDIR)/initramfs-linuxboot.cpio.gz.conf $(ROOTDIR)/stboot-installation/initramfs-includes/https_roots.pem $(CONFIGDIR)/security_configuration.json
+$(OUTDIR)/initramfs-linuxboot.cpio.gz: $(CONFIGDIR)/initramfs-linuxboot.cpio.gz.conf $(ROOTDIR)/stboot-installation/initramfs-includes/https_roots.pem $(OUTDIR)/security_configuration.json
 	@echo "common/build_kernel.sh"
 
 
@@ -36,7 +36,7 @@ $(OUTDIR)/initramfs-linuxboot.cpio.gz: $(CONFIGDIR)/initramfs-linuxboot.cpio.gz.
 
 
 $(CONFIGDIR)/linuxboot.vmlinux.conf: $(ROOTDIR)/run.config $(CONFIGDIR)
-	echo "generating: $@ "
+	echo "\ngenerating: $@ "
 	$(eval CONFIGS_NAMES := ST_BOOT_MBR_KERNEL_VERSION)
 	cat $(ROOTDIR)/run.config | grep -E "$(CONFIGS_NAMES)" >> $@.temp
 	rsync -c $@.temp $@
@@ -49,15 +49,15 @@ $(OUTDIR)/mbr-bootloader/linuxboot.vmlinux: $(CONFIGDIR)/linuxboot.vmlinux.conf
 
 
 $(CONFIGDIR)/host_configuration.json.conf: $(ROOTDIR)/run.config $(CONFIGDIR)
-	echo "generating: $@ "
-	$(eval CONFIGS_NAMES := ST_BOOT_COMMON_NETWORK_HOST|ST_BOOT_COMMON_PROVISIONING_SERVER_URL)
+	echo "\ngenerating: $@ "
+	$(eval CONFIGS_NAMES := ST_BOOT_COMMON_NETWORK_HOST|ST_BOOT_COMMON_NETWORK_MODE|ST_BOOT_COMMON_PROVISIONING_SERVER_URL)
 	cat $(ROOTDIR)/run.config | grep -E "$(CONFIGS_NAMES)" >> $@.temp
 	rsync -c $@.temp $@
 	rm $@.temp
 
 $(OUTDIR)/host_configuration.json: $(CONFIGDIR)/host_configuration.json.conf
 	@echo "\ngenerating: $@" 
-	build_host_config.sh
+	$(COMMONDIR)/build_host_config.sh
 
 
 
@@ -65,7 +65,7 @@ $(OUTDIR)/host_configuration.json: $(CONFIGDIR)/host_configuration.json.conf
 
 
 $(CONFIGDIR)/data_partition.ext4.conf: $(ROOTDIR)/run.config $(CONFIGDIR)
-	echo "generating: $@ "
+	echo "\ngenerating: $@ "
 	$(eval CONFIGS_NAMES := ST_BOOT_COMMON_DATA_PARTITION_SIZE)
 	cat $(ROOTDIR)/run.config | grep -E "$(CONFIGS_NAMES)" >> $@.temp
 	rsync -c $@.temp $@

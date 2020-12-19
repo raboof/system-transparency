@@ -3,6 +3,7 @@
 
 ROOTDIR := $(CURDIR)
 COMMONDIR := $(ROOTDIR)/stboot-installation/common
+EFIDIR := $(ROOTDIR)/stboot-installation/efi-application
 CONFIGDIR := $(ROOTDIR)/cache/stboot-installation/
 OUTDIR := $(ROOTDIR)/out/stboot-installation
 
@@ -11,7 +12,7 @@ include ./stboot-installation/common/Makefile
 
 
 
-stboot_efi_installation.img: boot_partition.vfat data_partition.ext4
+$(OUTDIR)/efi-application/stboot_efi_installation.img: $(OUTDIR)/efi-application/boot_partition.vfat $(OUTDIR)/data_partition.ext4
 	@echo "\ngenerating: :@"
 	$(ROOTDIR)/stboot-installation/efi-application/build_image.sh
 
@@ -19,19 +20,19 @@ stboot_efi_installation.img: boot_partition.vfat data_partition.ext4
 
 
 
-$(CONFIGDIR)/st_boot_efi_kernel_config.patch.conf: $(ROOTDIR)/run.config $(CONFIGDIR)
-	echo "generating: $@ "
-	$(eval CONFIGS_NAMES := ST_BOOT_EFI_KERNEL_CONFIG|ST_BOOT_LINUXBOOT_CMDLINE)
+$(CONFIGDIR)/st_boot_efi_kernel.config.conf: $(ROOTDIR)/run.config $(CONFIGDIR)
+	echo "\ngenerating: $@ "
+	$(eval CONFIGS_NAMES := ST_BOOT_EFI_KERNEL_CONFIG|ST_BOOT_COMMON_LINUXBOOT_CMDLINE)
 	cat $(ROOTDIR)/run.config | grep -E "$(CONFIGS_NAMES)" >> $@.temp
 	rsync -c $@.temp $@
 	rm $@.temp
 
-st_boot_efi_kernel_config: $(CONFIGDIR)/st_boot_efi_kernel_config.conf
+$(OUTDIR)/st_boot_efi_kernel.config: $(CONFIGDIR)/st_boot_efi_kernel.config.conf
 	@echo "\ngenerating: $@" 
-	build_efi_kernel_config.sh
+	$(EFIDIR)/build_efi_kernel_config.sh
 
 
 
 
-all: stboot_efi_installation.img
+all: $(OUTDIR)/efi-application/stboot_efi_installation.img
 	@echo "all" 	

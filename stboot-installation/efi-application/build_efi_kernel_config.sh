@@ -10,11 +10,10 @@ dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../../" && pwd)"
 
 # import global configuration
-source ${root}/cache/stboot-installation/st_boot_efi_kernel_config.patch.conf
+source ${root}/cache/stboot-installation/st_boot_efi_kernel.config.conf
 
 common="${root}/stboot-installation/common"
 kernel_out="${root}/out/stboot-installation/efi-application/linuxboot.efi"
-kernel_version=${ST_BOOT_EFI_KERNEL_VERSION}
 kernel_config=${ST_BOOT_EFI_KERNEL_CONFIG}
 cmdline=${ST_BOOT_COMMON_LINUXBOOT_CMDLINE}
 
