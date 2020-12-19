@@ -79,7 +79,7 @@ digraph build_mbr_kernel_config {
 	->
 	{
 		node [style=solid shape=ellipse]
-		"st_boot_mbr_kernel_config.patch"
+		"/out/stboot-installation/st_boot_mbr_kernel.config"
 	}
 
 
@@ -92,9 +92,9 @@ digraph build_mbr_kernel_config {
 		//"/cache/configs/current/st_boot_mbr.conf" 
 		
 		"CONFIG: ${ST_BOOT_MBR_KERNEL_VERSION}"
-		"st_boot_mbr_kernel_config.patch"
+		"/out/stboot-installation/st_boot_mbr_kernel.config"
 
-		"/out/stboot-installation/initramfs-linuxboot.cpio.gz" // in defconfig aka "st_boot_mbr_kernel_config.patch"
+		"/out/stboot-installation/initramfs-linuxboot.cpio.gz" // in defconfig aka "st_boot_mbr_kernel_config"
 	}
 	-> 
 	"/stboot-installation/common/build_kernel.sh"

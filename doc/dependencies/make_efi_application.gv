@@ -80,7 +80,7 @@ digraph make_mbr_bootloader {
 	->
 	{
 		node [style=solid shape=ellipse]
-		"st_boot_efi_kernel_config.patch"
+		"/out/stboot-installation/st_boot_efi_kernel.config"
 	}
 
 
@@ -94,9 +94,9 @@ digraph make_mbr_bootloader {
 		//"/cache/configs/current/st_boot_mbr.conf" 
 		
 		"CONFIG: ${ST_BOOT_EFI_KERNEL_VERSION}"
-		"st_boot_efi_kernel_config.patch"
+		"/out/stboot-installation/st_boot_efi_kernel.config"
 
-		"/out/stboot-installation/initramfs-linuxboot.cpio.gz" // in defconfig aka "${ST_BOOT_MBR_KERNEL_CONFIG}.patch"
+		"/out/stboot-installation/initramfs-linuxboot.cpio.gz" // in defconfig aka "${ST_BOOT_MBR_KERNEL_CONFIG}"
 	}
 	-> 
 	"/stboot-installation/common/build_kernel.sh"
