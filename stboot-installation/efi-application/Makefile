@@ -34,5 +34,19 @@ $(OUTDIR)/st_boot_efi_kernel.config: $(CONFIGDIR)/st_boot_efi_kernel.config.conf
 
 
 
+
+
+$(OUTDIR)/efi-application/boot_partition.vfat: $(OUTDIR)/host_configuration.json $(OUTDIR)/efi-application/linuxboot.efi
+	@echo "\ngenerating: $@" 
+	$(EFIDIR)/build_boot_filesystem.sh
+
+
+
+
+
+
+
+
+
 all: $(OUTDIR)/efi-application/stboot_efi_installation.img
 	@echo "all" 	

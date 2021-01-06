@@ -22,14 +22,33 @@ $(OUTDIR)/security_configuration.json: $(CONFIGDIR)/security_configuration.json.
 
 $(CONFIGDIR)/initramfs-linuxboot.cpio.gz.conf: $(ROOTDIR)/run.config 
 	echo "\ngenerating: $@ "
-	$(eval CONFIGS_NAMES := ST_BOOT_MBR_KERNEL_VERSION)
+	$(eval CONFIGS_NAMES := ST_BOOT_COMMON_LINUXBOOT_VARIANT)
 	cat $(ROOTDIR)/run.config | grep -E "$(CONFIGS_NAMES)" >> $@.temp
 	rsync -c $@.temp $@
 	rm $@.temp
 
 
+# "KEYS" missing
 $(OUTDIR)/initramfs-linuxboot.cpio.gz: $(CONFIGDIR)/initramfs-linuxboot.cpio.gz.conf $(ROOTDIR)/stboot-installation/initramfs-includes/https_roots.pem $(OUTDIR)/security_configuration.json
-	@echo "common/build_kernel.sh"
+	@echo "\ngenerating: $@" 
+	$(COMMONDIR)/build_initramfs.sh
+
+
+
+
+
+
+$(CONFIGDIR)/initramfs-linuxboot.efi.conf: $(ROOTDIR)/run.config 
+	echo "\ngenerating: $@ "
+	$(eval CONFIGS_NAMES := ST_BOOT_EFI_KERNEL_VERSION)
+	cat $(ROOTDIR)/run.config | grep -E "$(CONFIGS_NAMES)" >> $@.temp
+	rsync -c $@.temp $@
+	rm $@.temp
+
+$(OUTDIR)/efi-application/linuxboot.efi: $(CONFIGDIR)/initramfs-linuxboot.efi.conf $(OUTDIR)/st_boot_efi_kernel.config $(OUTDIR)/initramfs-linuxboot.cpio.gz
+	@echo "\ngenerating: $@" 
+	$(COMMONDIR)/build_kernel.sh
+
 
 
 
